@@ -17,9 +17,35 @@ function App() {
     housing: 'no', loan: 'no', contact: 'cellular', month: 'may',
     day_of_week: 'mon', campaign: 1, pdays: 999, previous: 0, poutcome: 'nonexistent'
   });
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (field, value) => {
     setForm({ ...form, [field]: value });
+  };
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    setError(null);
+    setResult(null);
+    try {
+      const response = await fetch('https://ominous-space-spork-x5x7xxqrww79c947-8000.app.github.dev/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form)
+      });
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.detail?.[0]?.msg || 'Prediction failed');
+      }
+      const data = await response.json();
+      setResult(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -96,7 +122,22 @@ function App() {
         </select>
       </label><br/><br/>
 
-      <button>Predict</button>
+      <button onClick={handleSubmit} disabled={loading}>
+        {loading ? 'Predicting...' : 'Predict'}
+      </button>
+
+      {error && (
+        <div style={{ marginTop: 16, padding: 12, background: '#fee', border: '1px solid #c33' }}>
+          Error: {error}
+        </div>
+      )}
+
+      {result && (
+        <div style={{ marginTop: 16, padding: 12, background: result.prediction === 'yes' ? '#efe' : '#f5f5f5', border: '1px solid #999' }}>
+          <strong>Prediction: {result.prediction.toUpperCase()}</strong><br/>
+          Probability of subscribing: {(result.probability * 100).toFixed(1)}%
+        </div>
+      )}
     </div>
   );
 }
