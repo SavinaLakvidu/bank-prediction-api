@@ -1,5 +1,5 @@
 import { useState } from 'react';
-
+import './App.css';
 const JOB_OPTIONS = ['admin.', 'blue-collar', 'entrepreneur', 'housemaid', 'management',
   'retired', 'self-employed', 'services', 'student', 'technician', 'unemployed', 'unknown'];
 const MARITAL_OPTIONS = ['divorced', 'married', 'single', 'unknown'];
@@ -9,7 +9,6 @@ const YES_NO_UNKNOWN = ['yes', 'no', 'unknown'];
 const CONTACT_OPTIONS = ['cellular', 'telephone'];
 const MONTH_OPTIONS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
 const DAY_OPTIONS = ['mon', 'tue', 'wed', 'thu', 'fri'];
-const POUTCOME_OPTIONS = ['failure', 'nonexistent', 'success'];
 
 function App() {
   const [form, setForm] = useState({
@@ -49,97 +48,126 @@ function App() {
   };
 
   return (
-    <div style={{ maxWidth: 480, margin: '40px auto', fontFamily: 'sans-serif' }}>
-      <h2>Term Deposit Subscription Predictor</h2>
+    <div className="app">
+      <div className="header-band">
+        <h2>Term Deposit Subscription Predictor</h2>
+        <p className="intro">
+          Enter a client's details to estimate their likelihood of subscribing to a term deposit.
+          Use this to help prioritize who to call first.
+        </p>
+      </div>
+      <div className="form-grid">
+        <fieldset>
+          <legend>Client Profile</legend>
+          <label>Age
+            <input type="number"
+              value={form.age === 0 ? '' : form.age}
+              onChange={e => handleChange('age', e.target.value === '' ? 0 : Number(e.target.value))} />
+          </label>
+          <label>Job
+            <select value={form.job} onChange={e => handleChange('job', e.target.value)}>
+              {JOB_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+            </select>
+          </label>
+          <label>Marital Status
+            <select value={form.marital} onChange={e => handleChange('marital', e.target.value)}>
+              {MARITAL_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+            </select>
+          </label>
+          <label>Education
+            <select value={form.education} onChange={e => handleChange('education', e.target.value)}>
+              {EDUCATION_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+            </select>
+          </label>
+        </fieldset>
 
-      <label>Age<br/>
-        <input type="number" value={form.age} onChange={e => handleChange('age', Number(e.target.value))} />
-      </label><br/><br/>
+        <fieldset>
+          <legend>Financial Status</legend>
+          <label>Housing Loan
+            <select value={form.housing} onChange={e => handleChange('housing', e.target.value)}>
+              {YES_NO_UNKNOWN.map(o => <option key={o} value={o}>{o}</option>)}
+            </select>
+          </label>
+          <label>Personal Loan
+            <select value={form.loan} onChange={e => handleChange('loan', e.target.value)}>
+              {YES_NO_UNKNOWN.map(o => <option key={o} value={o}>{o}</option>)}
+            </select>
+          </label>
+        </fieldset>
+      </div>
+      <fieldset>
+        <legend>Campaign Contact Details</legend>
+        <label>Contact Type
+          <select value={form.contact} onChange={e => handleChange('contact', e.target.value)}>
+            {CONTACT_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+          </select>
+        </label>
+        <label>Planned Contact Month
+          <select value={form.month} onChange={e => handleChange('month', e.target.value)}>
+            {MONTH_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+          </select>
+        </label>
+        <label>Planned Contact Day
+          <select value={form.day_of_week} onChange={e => handleChange('day_of_week', e.target.value)}>
+            {DAY_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+          </select>
+        </label>
+        <label>Contacts Made This Campaign (so far)
+          <input type="number" min="1"
+            value={form.campaign === 0 ? '' : form.campaign}
+            onChange={e => handleChange('campaign', e.target.value === '' ? 0 : Number(e.target.value))} />
+        </label>
+        <label>Previous Contacts (in earlier campaigns)
+          <input type="number" min="0"
+            value={form.previous === 0 ? '' : form.previous}
+            onChange={e => {
+              const val = e.target.value === '' ? 0 : Number(e.target.value);
+              if (val === 0) {
+                setForm({ ...form, previous: val, pdays: 999, poutcome: 'nonexistent' });
+              } else {
+                setForm({ ...form, previous: val });
+              }
+            }} />
+        </label>
 
-      <label>Job<br/>
-        <select value={form.job} onChange={e => handleChange('job', e.target.value)}>
-          {JOB_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
-        </select>
-      </label><br/><br/>
-
-      <label>Marital Status<br/>
-        <select value={form.marital} onChange={e => handleChange('marital', e.target.value)}>
-          {MARITAL_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
-        </select>
-      </label><br/><br/>
-
-      <label>Education<br/>
-        <select value={form.education} onChange={e => handleChange('education', e.target.value)}>
-          {EDUCATION_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
-        </select>
-      </label><br/><br/>
-
-      <label>Housing Loan<br/>
-        <select value={form.housing} onChange={e => handleChange('housing', e.target.value)}>
-          {YES_NO_UNKNOWN.map(o => <option key={o} value={o}>{o}</option>)}
-        </select>
-      </label><br/><br/>
-
-      <label>Personal Loan<br/>
-        <select value={form.loan} onChange={e => handleChange('loan', e.target.value)}>
-          {YES_NO_UNKNOWN.map(o => <option key={o} value={o}>{o}</option>)}
-        </select>
-      </label><br/><br/>
-
-      <label>Contact Type<br/>
-        <select value={form.contact} onChange={e => handleChange('contact', e.target.value)}>
-          {CONTACT_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
-        </select>
-      </label><br/><br/>
-
-      <label>Contact Month<br/>
-        <select value={form.month} onChange={e => handleChange('month', e.target.value)}>
-          {MONTH_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
-        </select>
-      </label><br/><br/>
-
-      <label>Contact Day of Week<br/>
-        <select value={form.day_of_week} onChange={e => handleChange('day_of_week', e.target.value)}>
-          {DAY_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
-        </select>
-      </label><br/><br/>
-
-      <label>Number of Contacts This Campaign<br/>
-        <input type="number" min="1" value={form.campaign} onChange={e => handleChange('campaign', Number(e.target.value))} />
-      </label><br/><br/>
-
-      <label>Days Since Last Contact (999 = never)<br/>
-        <input type="number" min="0" value={form.pdays} onChange={e => handleChange('pdays', Number(e.target.value))} />
-      </label><br/><br/>
-
-      <label>Previous Contacts<br/>
-        <input type="number" min="0" value={form.previous} onChange={e => handleChange('previous', Number(e.target.value))} />
-      </label><br/><br/>
-
-      <label>Previous Campaign Outcome<br/>
-        <select value={form.poutcome} onChange={e => handleChange('poutcome', e.target.value)}>
-          {POUTCOME_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
-        </select>
-      </label><br/><br/>
+        {form.previous > 0 && (
+          <>
+            <label>Days Since That Last Contact
+              <input type="number" min="0"
+                value={form.pdays === 999 || form.pdays === 0 ? '' : form.pdays}
+                onChange={e => handleChange('pdays', e.target.value === '' ? 0 : Number(e.target.value))} />
+            </label>
+            <label>Outcome of That Previous Campaign
+              <select value={form.poutcome} onChange={e => handleChange('poutcome', e.target.value)}>
+                <option value="success">success</option>
+                <option value="failure">failure</option>
+              </select>
+            </label>
+          </>
+        )}
+        {form.previous === 0 && (
+          <span className="hint">No previous contact — "days since" and "previous outcome" aren't applicable.</span>
+        )}
+      </fieldset>
 
       <button onClick={handleSubmit} disabled={loading}>
-        {loading ? 'Predicting...' : 'Predict'}
+        {loading ? 'Predicting...' : 'Predict Likelihood'}
       </button>
 
-      {error && (
-        <div style={{ marginTop: 16, padding: 12, background: '#fee', border: '1px solid #c33' }}>
-          Error: {error}
-        </div>
-      )}
+      {error && <div className="error-box">Error: {error}</div>}
 
       {result && (
-        <div style={{ marginTop: 16, padding: 12, background: result.prediction === 'yes' ? '#efe' : '#f5f5f5', border: '1px solid #999' }}>
-          <strong>Prediction: {result.prediction.toUpperCase()}</strong><br/>
-          Probability of subscribing: {(result.probability * 100).toFixed(1)}%
+        <div className="result-box">
+          <div className="result-label">Prediction</div>
+          <div className="result-value">{result.prediction === 'yes' ? 'Likely to subscribe' : 'Unlikely to subscribe'}</div>
+          <div className="prob-track">
+            <div className="prob-fill" style={{ width: `${result.probability * 100}%` }} />
+          </div>
+          <div className="prob-pct">{(result.probability * 100).toFixed(1)}% probability of subscribing</div>
         </div>
       )}
     </div>
-  );
+  );  
 }
 
 export default App;
